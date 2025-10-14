@@ -17,8 +17,7 @@ window.AppLoader = {
     "core/apps/desktop-settings.js",
     "system/weather.js",
     "core/apps/store.js",
-    "system/calculator.js",
-    "core/apps/readme.js"
+    "system/calculator.js"
     ],
     
     // Initialize app loading after system is ready
