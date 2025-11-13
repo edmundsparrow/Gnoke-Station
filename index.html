@@ -1,259 +1,2698 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="application-name" content="Gnoke Station">
-    <meta name="description" content="Gnoke Station - The Ultra-Lightweight Industrial Desktop Environment by edmundsparrow">
-    <meta name="author" content="Ekong Ikpe (edmundsparrow)">
-    <meta name="theme-color" content="#667eea">
-    <title>Gnoke Station</title>
-    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-    <link rel="icon" type="image/png" href="assets/favicon.png">
-    <style>
-        /* --- Styles for the Boot Screen --- */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <title>Gnokestation</title>  
+    
+<style>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            color: white;
-            transition: opacity 0.5s ease-in-out; /* Fade-out effect */
-        }
+/* CSS Custom Properties for Theming */
+:root {
+    --theme-primary-1: #86b4e4;
+    --theme-primary-2: #3f6e9b;
+    --theme-bg-1: rgba(230, 238, 245, 0.95);
+    --theme-bg-2: rgba(230, 238, 245, 0.90);
+    --theme-bg-3: rgba(230, 238, 245, 0.85);
+    --theme-text: #1F4765;
+    --theme-accent: #1F4765;
+    --animation-speed: 0.3s;
+}
 
-        body.fade-out { opacity: 0; }
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+}
 
-        .boot-container {
-            text-align: center;
-            max-width: 500px;
-            padding: 40px;
-            display: none; /* Hidden until boot starts */
-        }
-
-        body:not(.boot-completed) .boot-container { display: block; }
-
-        .system-name {
-            font-size: 2.5rem;
-            font-weight: 300;
-            margin-bottom: 10px;
-            opacity: 0;
-            animation: fadeInUp 1s ease-out 0.5s forwards;
-        }
-
-        .tagline {
-            font-size: 1.1rem;
-            opacity: 0;
-            margin-bottom: 40px;
-            animation: fadeInUp 1s ease-out 1s forwards;
-        }
-
-        .creator {
-            font-size: 0.9rem;
-            opacity: 0;
-            margin-bottom: 30px;
-            color: rgba(255, 255, 255, 0.8);
-            animation: fadeInUp 1s ease-out 1.3s forwards;
-        }
-
-        .boot-status {
-            margin-bottom: 30px;
-            opacity: 0;
-            animation: fadeInUp 1s ease-out 1.5s forwards;
-        }
-
-        .status-text {
-            font-size: 0.95rem;
-            margin-bottom: 20px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .progress-container {
-            width: 300px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 2px;
-            margin: 0 auto;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #4CAF50, #81C784);
-            border-radius: 2px;
-            transition: width 0.3s ease;
-            animation: progressGlow 2s ease-in-out infinite;
-        }
-
-        .boot-steps {
-            margin-top: 30px;
-            opacity: 0;
-            animation: fadeInUp 1s ease-out 2s forwards;
-        }
-
-        .step {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 8px 0;
-            font-size: 0.85rem;
-            opacity: 0.6;
-        }
-
-        .step.active { opacity: 1; color: #81C784; }
-
-        .step-icon { margin-right: 8px; font-size: 1rem; }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes progressGlow {
-            0%, 100% { box-shadow: 0 0 5px rgba(129, 199, 132, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(129, 199, 132, 0.8); }
-        }
-    </style>
-</head>
-<body>
-
-<!-- License Popup -->
-<div id="license-popup" style="
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.95);
-    color: white;
+body { 
     font-family: 'Segoe UI', sans-serif;
-    display: none;
+    background: linear-gradient(135deg, var(--theme-primary-1) 0%, var(--theme-primary-2) 100%);
+    height: 100vh;
+    overflow: hidden;
+    transition: background var(--animation-speed, 0.3s) ease;
+    /* Sharp text rendering globally */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#desktop {
+    width: 100vw;
+    height: calc(100vh - 40px);
+    position: relative;
+}
+
+#windows-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* MINIMAL WINDOW STYLES */
+.window {
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    min-width: 200px;
+    min-height: 150px;
+    pointer-events: auto;
+    position: absolute;
+    transition: box-shadow var(--animation-speed, 0.3s) ease;
+}
+
+/* MINIMAL TITLE BAR - Super thin */
+.window-title-bar {
+    background: linear-gradient(135deg, var(--theme-primary-1), var(--theme-primary-2));
+    color: #f0f0f0;
+    padding: 4px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    height: 24px;
+    cursor: grab;
+    transition: background var(--animation-speed, 0.3s) ease;
+}
+
+.window-title {
+    font-size: 12px;
+    font-weight: 500;
+    flex-grow: 1;
+    line-height: 1;
+}
+
+.window-controls {
+    display: flex;
+    gap: 3px;
+}
+
+.window-controls button {
+    background: rgba(255, 255, 255, 0.15);
+    color: #f5f5f5;
+    border: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 10px;
+    transition: background 0.2s;
+    display: flex;
     align-items: center;
     justify-content: center;
+    line-height: 1;
+}
+
+.window-controls button:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.close-btn:hover {
+    background: #e74c3c !important;
+}
+
+/* MAXIMIZED CONTENT AREA */
+.window-content {
+    padding: 0;
+    height: calc(100% - 24px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #2d2d2d;
+}
+
+/* SHARP TASKBAR - NO BLUR */
+#taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    /* Solid background - no translucency */
+    background: rgb(15, 15, 20);
+    /* Remove all blur effects */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    z-index: 5000;
+    /* Force sharp rendering */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* Remove blur from all taskbar children */
+#taskbar * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.start-button {
+    background: linear-gradient(135deg, var(--theme-primary-1), var(--theme-primary-2));
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+    /* Sharp text */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+.start-button:hover {
+    filter: brightness(1.1);
+}
+
+.taskbar-items {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0 8px;
+}
+
+.taskbar-item {
+    background: rgba(255, 255, 255, 0.12);
+    color: #f5f5f5;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 4px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+    /* Sharp text */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.taskbar-item:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.clock {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: #f0f0f0;
+    min-width: 60px;
     text-align: center;
-    z-index: 99999;
-    padding: 20px;
-">
-    <div style="max-width: 500px;">
-        <h1>Notice</h1>
-        <p style="font-size:16px; line-height:1.5;">
-            This page is licensed under the 
-            <a href="/license" target="_blank" style="color:#76c7ff; text-decoration:underline;">GNU General Public License v3.0 (GPLv3)</a>.
-        </p>
-        <p style="margin-top:20px; font-size:14px;">
-            <label style="cursor:pointer;">
-                <input type="checkbox" id="accept-license" style="margin-right:8px;"> I have read and accept the license
-            </label>
-        </p>
-        <button id="continue-btn" disabled style="
-            margin-top:15px;
-            padding:8px 16px;
-            font-size:14px;
-            cursor:pointer;
-            border:none;
-            border-radius:6px;
-            background: linear-gradient(135deg, #3a6ea5, #764ba2);
-            color:white;
-        ">Continue</button>
-    </div>
-</div>
+    /* Sharp monospace rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
 
-<!-- Boot Screen -->
-<div class="boot-container">
-    <h1 class="system-name">Gnoke Station</h1>
-    <p class="tagline">The Ultra-Lightweight Industrial Desktop Environment</p>
-    <p class="creator">A WebDesktop by edmundsparrow</p>
-    
-    <div class="boot-status">
-        <div class="status-text" id="statusText">Initializing system...</div>
-        <div class="progress-container">
-            <div class="progress-bar" id="progressBar"></div>
-        </div>
-    </div>
-    
-    <div class="boot-steps">
-        <div class="step" id="step1"><span class="step-icon">⚡</span><span>Loading core services</span></div>
-        <div class="step" id="step2"><span class="step-icon">🖥️</span><span>Initializing Gnoke Station desktop</span></div>
-        <div class="step" id="step3"><span class="step-icon">📦</span><span>Loading applications</span></div>
-        <div class="step" id="step4"><span class="step-icon">🎨</span><span>Preparing user interface</span></div>
-        <div class="step" id="step5"><span class="step-icon">✅</span><span>Ready to launch</span></div>
-    </div>
-</div>
+/* Sharp system icons */
+.network-icon,
+.show-desktop-button {
+    background: transparent;
+    border: none;
+    color: #f5f5f5;
+    cursor: pointer;
+    padding: 6px;
+    margin-right: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background 0.2s;
+    /* Sharp icon rendering */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    -webkit-font-smoothing: antialiased;
+}
 
+.network-icon:hover,
+.show-desktop-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Desktop Icons Container */
+.desktop-icons-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 15px;
+    z-index: 100;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    align-items: start;
+    justify-items: center;
+    padding-bottom: 20px;
+}
+
+/* Desktop Icon */
+.desktop-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80px;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.desktop-icon:hover {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    transform: scale(1.05) translateY(-2px);
+}
+
+.desktop-icon-image {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    border: 2px solid #28a745;
+    transition: all 0.2s ease;
+    /* Sharp icon rendering */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+.desktop-icon:hover .desktop-icon-image {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.desktop-icon-label {
+    font-size: 11px;
+    color: white;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    line-height: 1.2;
+    word-wrap: break-word;
+    max-width: 80px;
+    margin-top: 2px;
+    /* Sharp text */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Icon launch animation */
+@keyframes iconLaunch {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+
+/* Selected icon state */
+.desktop-icon.selected {
+    background: rgba(74, 144, 226, 0.3) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+/* Smooth transitions for theme changes */
+body, .window-title-bar, .start-button {
+    transition: all var(--animation-speed, 0.3s) ease;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .desktop-icon {
+        min-height: 44px;
+    }
+    
+    .desktop-icons-container {
+        grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+        gap: 10px;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+    }
+    
+    .desktop-icon-image {
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+    }
+    
+    .desktop-icon-label {
+        font-size: 10px;
+    }
+}
+
+</style></head>
+<body>
+    <!-- Desktop Container -->
+    <div id="desktop">
+        <div id="windows-container"></div>
+    </div>
+
+    <!-- Taskbar -->
+    <div id="taskbar">
+        <button class="start-button" id="start-btn">
+            <span>⊞</span> Start
+        </button>
+        <div class="taskbar-items" id="taskbar-items"></div>
+        <div class="clock" id="clock">--:--</div>
+    </div>
+
+    <!-- Core System (Load Order Critical) -->  
+    <script src="desktop.js"></script>
+  
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const popup = document.getElementById('license-popup');
-    const checkbox = document.getElementById('accept-license');
-    const continueBtn = document.getElementById('continue-btn');
-    const bootContainer = document.querySelector('.boot-container');
-
-    checkbox.addEventListener('change', () => {
-        continueBtn.disabled = !checkbox.checked;
-    });
-
-    continueBtn.addEventListener('click', () => {
-        popup.style.display = 'none';
-        document.body.classList.add('fade-out');
-        setTimeout(() => { window.location.href = "main.html"; }, 500);
-    });
-
-    const bootSteps = [
-        { text: "Initializing system...", duration: 1000, progress: 15 },
-        { text: "Loading core services...", duration: 800, progress: 30 },
-        { text: "Starting Gnoke Station desktop...", duration: 1200, progress: 50 },
-        { text: "Loading applications...", duration: 1000, progress: 70 },
-        { text: "Preparing user interface...", duration: 800, progress: 85 },
-        { text: "Almost ready...", duration: 600, progress: 95 },
-        { text: "Boot sequence complete. User Notice pending...", duration: 1000, progress: 100 }
-    ];
-
-    let currentStep = 0;
-    const statusText = document.getElementById('statusText');
-    const progressBar = document.getElementById('progressBar');
-
-    function runBootSequence() {
-        if (currentStep >= bootSteps.length) {
-            bootContainer.style.display = 'none';
-            document.body.classList.add('boot-completed'); 
-            popup.style.display = 'flex';
-            return;
+window.AppRegistry = {
+    registeredApps: new Map(),
+    runningInstances: new Map(),
+    
+    // Register new application
+    registerApp(appConfig) {
+        // Validate app configuration
+        if (!this.validateAppConfig(appConfig)) {
+                        return false;
         }
-        const step = bootSteps[currentStep];
-        statusText.textContent = step.text;
-        progressBar.style.width = step.progress + '%';
-        const stepEl = document.getElementById(`step${currentStep + 1}`);
-        if (stepEl) stepEl.classList.add('active');
-        currentStep++;
-        setTimeout(runBootSequence, step.duration);
+        
+        this.registeredApps.set(appConfig.id, appConfig);
+        
+        // Emit registration event
+        if (window.EventBus) {
+            window.EventBus.emit('app-registered', appConfig);
+        }
+        
+    },
+    
+    // Launch application
+    openApp(appId) {
+        const app = this.registeredApps.get(appId);
+
+        // Check for single instance
+        if (app.singleInstance && this.runningInstances.has(appId)) {
+            const existingInstance = this.runningInstances.get(appId);
+            if (existingInstance && existingInstance.parentNode) {
+                // Focus existing instance
+                if (window.WindowManager) {
+                    if (existingInstance.style.display === 'none') {
+                        window.WindowManager.restoreWindow(existingInstance.id);
+                    } else {
+                        window.WindowManager.bringToFront(existingInstance);
+                    }
+                }
+                return existingInstance;
+            } else {
+                // Clean up stale reference
+                this.runningInstances.delete(appId);
+            }
+        }
+        
+        // Launch app
+        try {
+            const instance = app.handler();
+            
+            if (instance && instance.nodeType === Node.ELEMENT_NODE) {
+                // Track single instance apps
+                if (app.singleInstance) {
+                    this.runningInstances.set(appId, instance);
+                    
+                    // Setup cleanup when window closes
+                    if (window.EventBus) {
+                        const cleanup = (data) => {
+                            // Check if the closed window is the instance we tracked
+                            if (data.windowId === instance.id) {
+                                this.runningInstances.delete(appId);
+                                window.EventBus.off('window-closed', cleanup);
+                            }
+                        };
+                        window.EventBus.on('window-closed', cleanup);
+                    }
+                }
+                
+                // Emit app launch event
+                if (window.EventBus) {
+                    window.EventBus.emit('app-launched', { appId, instance });
+                }
+                
+                return instance;
+            }
+            
+        } catch (error) {
+                    }
+        
+        return null;
+    },
+    
+    // Validate app configuration
+    validateAppConfig(config) {
+        if (!config || typeof config !== 'object') return false;
+        if (!config.id || typeof config.id !== 'string') return false;
+        if (!config.name || typeof config.name !== 'string') return false;
+        if (!config.handler || typeof config.handler !== 'function') return false;
+        return true;
+    },
+    
+    // Get all registered apps
+    getAllApps() {
+        return Array.from(this.registeredApps.values());
+    },
+    
+    // Get specific app
+    getApp(appId) {
+        return this.registeredApps.get(appId);
+    },
+    
+    // Check if app is running
+    isAppRunning(appId) {
+        return this.runningInstances.has(appId);
+    },
+    
+    // Get running instance
+    getRunningInstance(appId) {
+        return this.runningInstances.get(appId);
+    }
+};
+
+// Auto-register default icon provider
+window.AppRegistry.getDefaultIcon = function() {
+    return "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'><rect width='48' height='48' rx='8' fill='%23666'/><text x='24' y='30' text-anchor='middle' font-size='12' fill='white'>App</text></svg>";
+};
+
+// Register documentation with Docs service - wait for it to be ready
+(function registerAppRegistryDoc() {
+  const tryRegister = () => {
+    // Check if Docs service is available and ready
+    if (window.Docs && window.Docs.initialized && typeof window.Docs.register === 'function') {
+      window.Docs.register('app-registry', {
+        name: "AppRegistry",
+        version: "1.0.0",
+        description: "Core service for managing the lifecycle, registration, and launching of all desktop applications.",
+        type: "System Service",
+        dependencies: ["EventBus", "WindowManager"],
+        features: [
+          "Global singleton (window.AppRegistry)",
+          "Application registration and validation.",
+          "Handles app launching and tracking of running instances.",
+          "Enforces single-instance app mode.",
+          "Automatic cleanup of running instance tracking on window close."
+        ],
+        methods: [
+          { name: "registerApp(appConfig)", description: "Adds a new application to the registry." },
+          { name: "openApp(appId)", description: "Launches or focuses a registered application." },
+          { name: "getAllApps()", description: "Returns an array of all registered app configurations." },
+          { name: "isAppRunning(appId)", description: "Checks if a specific app instance is currently running." },
+          { name: "getDefaultIcon()", description: "Returns a default SVG icon data URI for generic apps." }
+        ],
+        events: [
+          "app-registered", "app-launched"
+        ],
+        autoGenerated: false
+      });
+            return true;
+    }
+    return false;
+  };
+
+  // Try immediate registration
+  if (tryRegister()) return;
+
+  // Wait for docs-ready event via EventBus (AppRegistry must load after EventBus)
+  if (window.EventBus) {
+    const onDocsReady = () => {
+      if (tryRegister()) {
+        window.EventBus.off('docs-ready', onDocsReady);
+      }
+    };
+    window.EventBus.on('docs-ready', onDocsReady);
+  }
+
+})();
+
+    
+window.EventBus = {
+  listeners: new Map(),
+
+  /**
+   * Register a listener for an event
+   * @param {string} event - Event name
+   * @param {function} callback - Function to execute when event fires
+   */
+  on(event, callback) {
+    if (!event || typeof callback !== 'function') {
+            return;
+    }
+    
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, []);
+    }
+    this.listeners.get(event).push(callback);
+  },
+
+  emit(event, data) {
+    if (!event) return;
+    
+    if (this.listeners.has(event)) {
+      const callbacks = this.listeners.get(event);
+      callbacks.forEach(callback => {
+        try {
+          callback(data);
+        } catch (error) {
+        }
+      });
+    }
+  },
+
+
+  off(event, callback) {
+    if (!this.listeners.has(event)) return;
+    
+    const callbacks = this.listeners.get(event);
+    const index = callbacks.indexOf(callback);
+    if (index > -1) {
+      callbacks.splice(index, 1);
+    }
+    
+    // Clean up empty event arrays
+    if (callbacks.length === 0) {
+      this.listeners.delete(event);
+    }
+  },
+
+  
+  getListenerCount(event) {
+    return this.listeners.has(event) ? this.listeners.get(event).length : 0;
+  }
+};
+
+// Register documentation with Docs service - wait for it to be ready
+(function registerEventBusDoc() {
+  const tryRegister = () => {
+    if (window.Docs && window.Docs.initialized && typeof window.Docs.register === 'function') {
+      window.Docs.register('event-bus', {
+        name: "EventBus",
+        version: "1.0.0",
+        description: "Core communication layer providing a global publish/subscribe event system for Unity Station modules and apps.",
+        type: "System Service",
+        features: [
+          "Global singleton (window.EventBus)",
+          "Unlimited listeners per event",
+          "Emit events with optional data payload",
+          "Remove specific listeners with .off()",
+          "Error-safe listener execution",
+          "Listener count inspection via .getListenerCount()"
+        ],
+        methods: [
+          { name: "on(event, callback)", description: "Register a listener for a given event" },
+          { name: "emit(event, data)", description: "Emit an event with optional payload" },
+          { name: "off(event, callback)", description: "Remove a specific listener" },
+          { name: "getListenerCount(event)", description: "Return number of listeners for an event" }
+        ],
+        autoGenerated: false
+      });
+            return true;
+    }
+    return false;
+  };
+
+  // Try immediate registration
+  if (tryRegister()) return;
+
+  // Wait for docs-ready event
+  if (window.EventBus) {
+    const onDocsReady = () => {
+      if (tryRegister()) {
+        window.EventBus.off('docs-ready', onDocsReady);
+      }
+    };
+    window.EventBus.on('docs-ready', onDocsReady);
+  }
+
+})();
+
+/* ========== app-loader.js ========== */
+
+window.AppLoader = {
+    loadedApps: new Set(),
+    failedApps: new Set(),
+    
+    // List of user applications to load
+      appScripts: [
+    "menu.js",
+ ],
+    
+    // Initialize app loading after system is ready
+    init() {
+             
+        // Wait for core system to be ready
+        this.waitForSystem().then(() => {
+            this.loadAllApplications();
+        }).catch(error => {
+                    });
+    },
+    
+    // Wait for core system to be ready
+    waitForSystem() {
+        return new Promise((resolve, reject) => {
+            const maxWait = 10000; // 10 seconds max wait
+            const startTime = Date.now();
+            
+            const checkSystem = () => {
+                const requiredSystems = ['WebDesktop', 'AppRegistry', 'WindowManager'];
+                const missing = requiredSystems.filter(system => !window[system]);
+                
+                if (missing.length === 0 && window.WebDesktop.initialized) {
+                                    resolve();
+                } else if (Date.now() - startTime > maxWait) {
+                    reject(new Error('Timeout waiting for core system'));
+                } else {
+                                        setTimeout(checkSystem, 200);
+                }
+            };
+            
+            checkSystem();
+        });
+    },
+    
+    // Load all user applications
+    loadAllApplications() {
+                
+        const loadPromises = this.appScripts.map(scriptPath => {
+            return this.loadApplication(scriptPath);
+        });
+        
+        Promise.allSettled(loadPromises).then(results => {
+            this.reportLoadResults(results);
+        });
+    },
+    
+    // Load a single application
+    loadApplication(scriptPath) {
+        return new Promise((resolve, reject) => {
+            if (this.loadedApps.has(scriptPath)) {
+                resolve(`Already loaded: ${scriptPath}`);
+                return;
+            }
+            
+            const script = document.createElement('script');
+            script.src = scriptPath;
+            script.async = true;
+            
+            script.onload = () => {
+                this.loadedApps.add(scriptPath);
+                                resolve(`Loaded: ${scriptPath}`);
+            };         
+            
+            // Set timeout for loading
+            setTimeout(() => {
+                if (!this.loadedApps.has(scriptPath) && !this.failedApps.has(scriptPath)) {
+                    script.remove();
+                    this.failedApps.add(scriptPath);
+                    reject(new Error(`Timeout loading: ${scriptPath}`));
+                }
+            }, 10000);
+            
+            document.body.appendChild(script);
+        });
+    },
+    
+    // Report loading results
+    reportLoadResults(results) {
+        const loaded = results.filter(r => r.status === 'fulfilled').length;
+        const failed = results.filter(r => r.status === 'rejected').length;
+           
+        // Emit event for system monitoring
+        if (window.EventBus) {
+            window.EventBus.emit('apps-loaded', {
+                loaded: loaded,
+                failed: failed,
+                loadedApps: Array.from(this.loadedApps),
+                failedApps: Array.from(this.failedApps)
+            });
+        } 
+    },
+    
+    // Reload a specific application
+    reloadApplication(scriptPath) {
+                
+        // Remove from loaded/failed sets
+        this.loadedApps.delete(scriptPath);
+        this.failedApps.delete(scriptPath);
+        
+        // Remove existing script tag
+        const existingScript = document.querySelector(`script[src="${scriptPath}"]`);
+        if (existingScript) {
+            existingScript.remove();
+        }
+        
+        // Reload the application
+        return this.loadApplication(scriptPath);
+    },
+    
+    // Add new application to load list
+    addApplication(scriptPath) {
+        if (!this.appScripts.includes(scriptPath)) {
+            this.appScripts.push(scriptPath);
+            return this.loadApplication(scriptPath);
+        }
+        return Promise.resolve(`Already in list: ${scriptPath}`);
+    },
+    
+    // Get loading statistics
+    getStats() {
+        return {
+            total: this.appScripts.length,
+            loaded: this.loadedApps.size,
+            failed: this.failedApps.size,
+            pending: this.appScripts.length - this.loadedApps.size - this.failedApps.size,
+            loadedApps: Array.from(this.loadedApps),
+            failedApps: Array.from(this.failedApps)
+        };
+    }
+};
+
+// Initialize when system is ready or immediately if it already is
+if (typeof window !== 'undefined') {
+    // Wait for core system first
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            // Small delay to let core system initialize first
+            setTimeout(() => {
+                window.AppLoader.init();
+            }, 500);
+        });
+    } else {
+        // DOM already loaded
+        setTimeout(() => {
+            window.AppLoader.init();
+        }, 500);
+    }
+}
+
+/* ========== menu.js ========== */
+
+(function() {
+  window.StartMenuApp = {
+    searchQuery: '',
+    expandedCategories: new Set(['recent', 'productivity']),
+    recentApps: JSON.parse(localStorage.getItem('webos-recent-apps') || '[]'),
+    maxRecent: 6,
+
+    categories: {
+      'recent': { name: 'Recently Used', icon: '🕑' },
+      'productivity': { name: 'Office & Productivity', icon: '📊', keywords: ['office', 'text', 'note', 'calculator', 'word', 'pad'] },
+      'system': { name: 'System & Tools', icon: '⚙️', keywords: ['system', 'settings', 'file', 'info', 'about', 'docs'] },
+      'multimedia': { name: 'Multimedia', icon: '🎭', keywords: ['media', 'audio', 'video', 'music', 'image', 'photo', 'gallery'] },
+      'games': { name: 'Games', icon: '🎮', keywords: ['game', 'puzzle', 'fun', 'play'] },
+      'internet': { name: 'Internet', icon: '🌐', keywords: ['web', 'browser', 'email', 'weather', 'contacts'] },
+      'other': { name: 'Other Applications', icon: '📦' }
+    },
+
+    createMenuHTML() {
+      // Get current theme colors from CSS variables
+      const primary1 = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary-1').trim() || '#86b4e4';
+      const primary2 = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary-2').trim() || '#3f6e9b';
+      const bg1 = getComputedStyle(document.documentElement).getPropertyValue('--theme-bg-1').trim() || 'rgba(230, 238, 245, 0.95)';
+      const bg2 = getComputedStyle(document.documentElement).getPropertyValue('--theme-bg-2').trim() || 'rgba(230, 238, 245, 0.90)';
+      const bg3 = getComputedStyle(document.documentElement).getPropertyValue('--theme-bg-3').trim() || 'rgba(230, 238, 245, 0.85)';
+      const accent = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#1F4765';
+
+      return `
+        <div class="start-menu-app" style="
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          background: linear-gradient(180deg, ${bg1} 0%, ${bg2} 50%, ${bg3} 100%);
+          font-family: 'Segoe UI', Arial, sans-serif;
+          font-size: 13px;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        ">
+          <div class="menu-header" style="
+            background: linear-gradient(135deg, ${primary1} 0%, ${primary2} 100%);
+            color: white;
+            padding: 12px 16px;
+            font-weight: bold;
+            font-size: 16px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            -webkit-font-smoothing: antialiased;
+          ">
+            <span>🪟 GnokeStation</span>
+          </div>
+
+          <div class="menu-search" style="
+            padding: 12px 16px;
+            background: ${bg1};
+          ">
+            <input type="text" id="start-search" placeholder="Search programs..." style="
+              width: 100%;
+              padding: 8px 12px;
+              border: 1px solid rgba(0,0,0,0.15);
+              border-radius: 4px;
+              font-size: 13px;
+              outline: none;
+              background: white;
+              box-sizing: border-box;
+              -webkit-font-smoothing: antialiased;
+            ">
+          </div>
+
+          <div class="menu-content" id="start-content" style="
+            flex-grow: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 8px;
+            max-height: 350px;
+          "></div>
+
+          <div class="menu-footer" style="
+            background: ${bg3};
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(0,0,0,0.1);
+          ">
+            <div class="menu-stats" id="start-stats" style="font-size: 10px; color: #666;">
+              0 programs available
+            </div>
+            <div class="view-toggle">
+              <button class="toggle-btn active" data-view="categories" style="
+                padding: 4px 8px; 
+                font-size: 10px; 
+                background: ${accent};
+                color: white; 
+                border: none; 
+                cursor: pointer; 
+                border-radius: 3px; 
+                margin-right: 2px;
+                -webkit-font-smoothing: antialiased;
+              ">Categories</button>
+              <button class="toggle-btn" data-view="all" style="
+                padding: 4px 8px; 
+                font-size: 10px; 
+                background: transparent;
+                color: ${accent}; 
+                border: 1px solid ${accent}; 
+                cursor: pointer; 
+                border-radius: 3px;
+                -webkit-font-smoothing: antialiased;
+              ">All Programs</button>
+            </div>
+          </div>
+        </div>
+      `;
+    },
+
+    hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? 
+        `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : 
+        '31, 78, 101';
+    },
+
+    setupEventHandlers() {
+      if (!this.currentWindow) return;
+
+      const searchInput = this.currentWindow.querySelector('#start-search');
+      const contentArea = this.currentWindow.querySelector('#start-content');
+
+      searchInput.addEventListener('input', (e) => {
+        this.searchQuery = e.target.value.toLowerCase();
+        this.renderApps();
+      });
+
+      contentArea.addEventListener('click', (e) => {
+        e.stopPropagation();
+        
+        const appItem = e.target.closest('.menu-app-item');
+        if (appItem) {
+          this.launchApp(appItem.dataset.appId);
+          return;
+        }
+
+        const categoryHeader = e.target.closest('.category-header');
+        if (categoryHeader) {
+          const categoryId = categoryHeader.dataset.category;
+          if (this.expandedCategories.has(categoryId)) {
+            this.expandedCategories.delete(categoryId);
+          } else {
+            this.expandedCategories.add(categoryId);
+          }
+          this.renderApps();
+        }
+      });
+
+      this.currentWindow.addEventListener('click', (e) => {
+        const toggleBtn = e.target.closest('.toggle-btn');
+        if (toggleBtn) {
+          const accent = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#1F4765';
+          
+          this.currentWindow.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.classList.remove('active');
+            btn.style.background = 'transparent';
+            btn.style.color = accent;
+            btn.style.border = `1px solid ${accent}`;
+          });
+          toggleBtn.classList.add('active');
+          toggleBtn.style.background = accent;
+          toggleBtn.style.color = 'white';
+          toggleBtn.style.border = 'none';
+          this.viewMode = toggleBtn.dataset.view;
+          this.renderApps();
+        }
+      });
+    },
+
+    refreshApps() {
+      if (this.currentWindow) this.renderApps();
+    },
+
+    renderApps() {
+      const contentArea = this.currentWindow.querySelector('#start-content');
+      const statsArea = this.currentWindow.querySelector('#start-stats');
+      
+      const apps = this.getAllApps();
+      const processedApps = apps.map(app => ({
+        ...app,
+        category: this.categorizeApp(app),
+        description: this.getAppDescription(app.id)
+      }));
+
+      statsArea.textContent = `${apps.length} programs in ${Object.keys(this.categories).length - 1} categories`;
+
+      let filteredApps = this.searchQuery ? 
+        processedApps.filter(app => (app.name + ' ' + app.description + ' ' + app.id).toLowerCase().includes(this.searchQuery)) : 
+        processedApps;
+
+      if (filteredApps.length === 0) {
+        contentArea.innerHTML = '<div style="text-align:center;padding:40px;color:#666;">No programs found</div>';
+        return;
+      }
+
+      if (!this.searchQuery && (!this.viewMode || this.viewMode === 'categories')) {
+        this.renderCategoryView(contentArea, filteredApps);
+      } else {
+        this.renderAllView(contentArea, filteredApps);
+      }
+    },
+
+    getAllApps() {
+      const apps = [];
+      if (window.AppRegistry && window.AppRegistry.registeredApps) {
+        window.AppRegistry.registeredApps.forEach((app, id) => {
+          if (id !== 'startmenu') {
+            apps.push({ id, name: app.name, icon: app.icon || this.getDefaultIcon() });
+          }
+        });
+      }
+      return apps;
+    },
+
+    categorizeApp(app) {
+      const searchText = (app.name + ' ' + app.id).toLowerCase();
+      for (const [categoryId, category] of Object.entries(this.categories)) {
+        if (categoryId === 'recent' || categoryId === 'other') continue;
+        if (category.keywords && category.keywords.some(keyword => searchText.includes(keyword))) {
+          return categoryId;
+        }
+      }
+      return 'other';
+    },
+
+    getAppDescription(appId) {
+      const descriptions = {
+        'calculator': 'Perform arithmetic calculations',
+        'clock': 'Analog clock with utilities',
+        'contacts': 'Manage contact information',
+        'weather': 'Weather conditions and forecasts',
+        'about': 'System information and docs',
+        'gallery': 'View and manage photos',
+        'calendar': 'Calendar and scheduling',
+        'desktop-settings': 'Customize desktop settings'
+      };
+      return descriptions[appId] || `${appId} application`;
+    },
+
+    renderCategoryView(container, apps) {
+      const accent = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#1F4765';
+      const bg1 = getComputedStyle(document.documentElement).getPropertyValue('--theme-bg-1').trim() || 'rgba(230, 238, 245, 0.95)';
+      const categorized = this.groupAppsByCategory(apps);
+      
+      if (this.recentApps.length > 0) {
+        const recentAppData = this.recentApps.map(id => apps.find(app => app.id === id)).filter(app => app);
+        if (recentAppData.length > 0) categorized.recent = recentAppData;
+      }
+
+      let html = '';
+      Object.entries(categorized).forEach(([categoryId, categoryApps]) => {
+        if (categoryApps.length === 0) return;
+        const category = this.categories[categoryId];
+        const isExpanded = this.expandedCategories.has(categoryId);
+
+        html += `
+          <div class="menu-category" style="margin-bottom: 8px; background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div class="category-header" data-category="${categoryId}" style="
+              display: flex; align-items: center; padding: 8px 12px;
+              background: ${bg1}; cursor: pointer; user-select: none;
+              border-radius: 6px 6px 0 0;
+            ">
+              <span style="font-size: 16px; margin-right: 8px;">${category.icon}</span>
+              <span style="flex-grow: 1; font-weight: 600; color: ${accent};">${category.name}</span>
+              <span style="background: rgba(${this.hexToRgb(accent)}, 0.2); color: ${accent}; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-right: 6px;">${categoryApps.length}</span>
+              <span style="color: ${accent}; ${isExpanded ? 'transform: rotate(90deg);' : ''} transition: transform 0.2s;">▶</span>
+            </div>
+            <div style="${isExpanded ? 'display: block;' : 'display: none;'} padding: 4px; background: white;">
+              ${categoryApps.map(app => this.renderAppItem(app, categoryId === 'recent')).join('')}
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    },
+
+    renderAllView(container, apps) {
+      const accent = getComputedStyle(document.documentElement).getPropertyValue('--theme-accent').trim() || '#1F4765';
+      const bg1 = getComputedStyle(document.documentElement).getPropertyValue('--theme-bg-1').trim() || 'rgba(230, 238, 245, 0.95)';
+      
+      const html = `
+        <div class="menu-category" style="margin-bottom: 8px; background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <div style="display: flex; align-items: center; padding: 8px 12px; background: ${bg1}; border-radius: 6px 6px 0 0;">
+            <span style="font-size: 16px; margin-right: 8px;">📋</span>
+            <span style="flex-grow: 1; font-weight: 600; color: ${accent};">All Programs</span>
+            <span style="background: rgba(${this.hexToRgb(accent)}, 0.2); color: ${accent}; padding: 2px 6px; border-radius: 10px; font-size: 10px;">${apps.length}</span>
+          </div>
+          <div style="padding: 4px; background: white;">
+            ${apps.sort((a, b) => a.name.localeCompare(b.name)).map(app => this.renderAppItem(app)).join('')}
+          </div>
+        </div>
+      `;
+      container.innerHTML = html;
+    },
+
+    renderAppItem(app, isRecent = false) {
+      const highlightedName = this.searchQuery ? 
+        app.name.replace(new RegExp(`(${this.searchQuery})`, 'gi'), '<span style="background: #ffd700;">$1</span>') : 
+        app.name;
+
+      return `
+        <div class="menu-app-item" data-app-id="${app.id}" style="
+          display: flex; align-items: center; padding: 6px 8px; margin: 2px 0; border-radius: 4px;
+          cursor: pointer; background: white; ${isRecent ? 'border-left: 3px solid #4caf50;' : ''}
+          transition: background 0.15s;
+        " onmouseover="this.style.background='rgba(0,0,0,0.05)'" onmouseout="this.style.background='white'">
+          <img src="${app.icon}" style="width: 24px; height: 24px; margin-right: 10px; border-radius: 2px; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;">
+          <div>
+            <div style="font-size: 13px; font-weight: 500; color: #333;">${highlightedName}</div>
+            <div style="font-size: 10px; color: #666;">${app.description}</div>
+          </div>
+        </div>
+      `;
+    },
+
+    groupAppsByCategory(apps) {
+      const grouped = {};
+      Object.keys(this.categories).forEach(categoryId => {
+        if (categoryId !== 'recent') grouped[categoryId] = [];
+      });
+      apps.forEach(app => {
+        if (grouped[app.category]) grouped[app.category].push(app);
+      });
+      Object.keys(grouped).forEach(categoryId => {
+        if (grouped[categoryId].length === 0) delete grouped[categoryId];
+      });
+      return grouped;
+    },
+
+    launchApp(appId) {
+      if (window.AppRegistry) {
+        window.AppRegistry.openApp(appId);
+        this.addToRecent(appId);
+      }
+    },
+
+    addToRecent(appId) {
+      this.recentApps = this.recentApps.filter(id => id !== appId);
+      this.recentApps.unshift(appId);
+      if (this.recentApps.length > this.maxRecent) {
+        this.recentApps = this.recentApps.slice(0, this.maxRecent);
+      }
+      localStorage.setItem('webos-recent-apps', JSON.stringify(this.recentApps));
+    },
+
+    getDefaultIcon() {
+      return "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><rect width='24' height='24' fill='%23ccc'/></svg>";
+    }
+  };
+
+  if (window.AppRegistry) {
+    window.AppRegistry.registerApp({
+      id: 'startmenu',
+      name: 'Start Menu',
+      icon: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><rect width='24' height='24' fill='%234a90e2'/></svg>",
+      handler: () => window.StartMenuApp.open(),
+      singleInstance: true
+    });
+  }
+})();
+
+/* ========== start-menu.js ========== */ 
+
+(function() {
+    
+    let menuOverlay = null;
+    let outsideClickHandler = null;
+    const startBtn = document.getElementById('start-btn');
+
+    function resetSearchAndCloseMenu() {
+        if (menuOverlay) {
+            // CRITICAL FIX: Reset the search filter in the StartMenuApp module
+            if (window.StartMenuApp) {
+                // Clear the filter variable and refresh the app list to show ALL apps
+                window.StartMenuApp.currentSearchTerm = '';
+                window.StartMenuApp.refreshApps();
+            }
+
+            // Remove the DOM element
+            menuOverlay.remove();
+            menuOverlay = null;
+            
+            // Cleanup the outside click handler if it was active
+            if(outsideClickHandler) {
+                 document.removeEventListener('click', outsideClickHandler);
+                 outsideClickHandler = null;
+            }
+        }
     }
 
-    window.addEventListener('load', () => {
-        setTimeout(runBootSequence, 2000);
-    });
-
-    document.addEventListener('click', () => {
-        if (currentStep < bootSteps.length) {
-            currentStep = bootSteps.length - 1;
-            statusText.textContent = "Fast boot enabled, showing notice...";
-            progressBar.style.width = '100%';
-            for (let i = 1; i <= 5; i++) {
-                const stepEl = document.getElementById(`step${i}`);
-                if (stepEl) stepEl.classList.add('active');
+    // Start menu overlay handler
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        startBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            // Close if already open (and cleanup state)
+            if (menuOverlay && menuOverlay.parentNode) {
+                resetSearchAndCloseMenu(); // Use the cleanup function
+                return;
             }
-            setTimeout(runBootSequence, 500); 
+            
+            // Create menu overlay
+            if (window.StartMenuApp) {
+                createMenuOverlay();
+            } else {
+                // Wait for StartMenuApp to load
+                const wait = setInterval(() => {
+                    if (window.StartMenuApp) {
+                        clearInterval(wait);
+                        createMenuOverlay();
+                    }
+                }, 100);
+                setTimeout(() => clearInterval(wait), 3000);
+            }
+        });
+        
+        function createMenuOverlay() {
+            menuOverlay = document.createElement('div');
+            menuOverlay.style.cssText = `
+                position: fixed;
+                bottom: 50px;
+                left: 10px;
+                width: 400px;
+                max-height: 500px;
+                z-index: 9999;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+            `;
+            
+            // Get menu content from StartMenuApp
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = window.StartMenuApp.createMenuHTML();
+            const menuContent = tempDiv.firstElementChild;
+            menuContent.style.height = '100%';
+            menuOverlay.appendChild(menuContent);
+            
+            document.body.appendChild(menuOverlay);
+            
+            // Setup handlers for the overlay content
+            window.StartMenuApp.currentWindow = menuOverlay;
+            window.StartMenuApp.setupEventHandlers();
+            window.StartMenuApp.refreshApps();
+            
+            // Close on outside click
+            setTimeout(() => {
+                // Define the handler and save its reference
+                outsideClickHandler = (event) => {
+                    if (!menuOverlay.contains(event.target) && !startBtn.contains(event.target)) {
+                        resetSearchAndCloseMenu(); // Use the cleanup function
+                        // Listener removal happens inside resetSearchAndCloseMenu
+                    }
+                };
+                document.addEventListener('click', outsideClickHandler);
+            }, 10);
+            
+            // Override launchApp to close overlay
+            const originalLaunch = window.StartMenuApp.launchApp;
+            window.StartMenuApp.launchApp = function(appId) {
+                originalLaunch.call(this, appId);
+                
+                // Use the new cleanup function after launching the app
+                if (menuOverlay) {
+                    resetSearchAndCloseMenu();
+                }
+            };
         }
     });
-});
-</script>
-</body>
-</html>
+
+    // --- Start Menu Documentation ---
+    (function registerStartMenuUIDoc() {
+        const tryRegister = () => {
+            if (window.Docs && window.Docs.initialized && typeof window.Docs.register === 'function') {
+                window.Docs.register('start-menu', {
+                    name: "Start Menu",
+                    version: "1.0.2", // Version bumped again for critical fix implementation
+                    description: "Procedural script responsible for capturing the start button click, creating the visual menu overlay container (DIV), and managing the overlay's display state and external closing behavior within the Unity Station environment. **Fix: Clears StartMenuApp search state when menu closes.**",
+                    type: "System Component",
+                    features: [
+                        "Captures 'start-btn' clicks to toggle the menu.",
+                        "Dynamically creates and styles the menu overlay container.",
+                        "Delegates content generation to the separate StartMenuApp module.",
+                        "Implements 'close on outside click' behavior with state cleanup.",
+                        "Overrides StartMenuApp.launchApp to automatically close the menu upon app launch."
+                    ],
+                    dependencies: ["StartMenuApp", "WindowManager", "DOM events"],
+                    methods: [
+                        { name: "createMenuOverlay()", description: "Internal function to construct, style, and append the menu container to the DOM." },
+                        { name: "resetSearchAndCloseMenu()", description: "Internal function that clears the StartMenuApp's internal search state and removes the menu from the DOM." }
+                    ],
+                    autoGenerated: false
+                });
+                return true;
+            }
+            return false;
+        };
+
+        // Standard robust registration pattern
+        if (tryRegister()) return;
+        if (window.EventBus) {
+            const onDocsReady = () => {
+                if (tryRegister()) {
+                    window.EventBus.off('docs-ready', onDocsReady);
+                }
+            };
+            window.EventBus.on('docs-ready', onDocsReady);
+        }
+        let attempts = 0;
+        const pollInterval = setInterval(() => {
+            if (tryRegister() || attempts++ > 50) {
+                clearInterval(pollInterval);
+            }
+        }, 100);
+    })();
+   
+})();
+
+/* ========== weather.js ========== */
+
+(function() {
+  window.WeatherApp = {
+    open() {
+      const weatherHTML = `
+        <div style="
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          background: linear-gradient(135deg, #74b9ff, #0984e3);
+          color: white;
+          font-family: 'Segoe UI', sans-serif;
+        ">
+          <div style="
+            padding: 16px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+          ">
+            <h2 style="margin: 0; font-size: 18px;">Weather</h2>
+          </div>
+          
+          <div style="
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+          ">
+            <div id="weather-icon" style="font-size: 64px; margin-bottom: 16px;">🌤️</div>
+            <div id="temperature" style="font-size: 36px; font-weight: bold; margin-bottom: 8px;">--°C</div>
+            <div id="description" style="font-size: 16px; margin-bottom: 16px;">Loading weather...</div>
+            <div id="location" style="font-size: 14px; opacity: 0.8; margin-bottom: 16px;">--</div>
+            
+            <div style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 16px;
+              width: 100%;
+              max-width: 300px;
+              margin-top: 20px;
+            ">
+              <div style="
+                background: rgba(255, 255, 255, 0.2);
+                padding: 12px;
+                border-radius: 8px;
+                backdrop-filter: blur(5px);
+              ">
+                <div style="font-size: 12px; opacity: 0.8;">Wind Speed</div>
+                <div id="wind-speed" style="font-size: 16px; font-weight: bold;">-- km/h</div>
+              </div>
+              <div style="
+                background: rgba(255, 255, 255, 0.2);
+                padding: 12px;
+                border-radius: 8px;
+                backdrop-filter: blur(5px);
+              ">
+                <div style="font-size: 12px; opacity: 0.8;">Humidity</div>
+                <div id="humidity" style="font-size: 16px; font-weight: bold;">--%</div>
+              </div>
+            </div>
+          </div>
+          
+          <div style="
+            padding: 12px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+            opacity: 0.8;
+          " id="last-update">
+            Click anywhere to refresh weather data
+          </div>
+        </div>
+      `;
+
+      const win = WindowManager.createWindow('Weather', weatherHTML, 320, 400);
+      this.setupWeather(win);
+      return win;
+    },
+
+    setupWeather(win) {
+      const temperatureEl = win.querySelector('#temperature');
+      const descriptionEl = win.querySelector('#description');
+      const locationEl = win.querySelector('#location');
+      const windSpeedEl = win.querySelector('#wind-speed');
+      const humidityEl = win.querySelector('#humidity');
+      const lastUpdateEl = win.querySelector('#last-update');
+      const weatherIcon = win.querySelector('#weather-icon');
+
+      const updateWeather = (lat, lon) => {
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
+          .then(res => res.json())
+          .then(data => {
+            const weather = data.current_weather;
+            if (!weather) {
+              descriptionEl.textContent = "Weather data unavailable.";
+              return;
+            }
+
+            temperatureEl.textContent = `${weather.temperature}°C`;
+            descriptionEl.textContent = `Windspeed ${weather.windspeed} km/h`;
+            locationEl.textContent = `Lat: ${lat.toFixed(2)}, Lon: ${lon.toFixed(2)}`;
+            windSpeedEl.textContent = `${weather.windspeed} km/h`;
+            humidityEl.textContent = `--%`; // Open-Meteo doesn’t return humidity
+            weatherIcon.textContent = "🌤️";
+            lastUpdateEl.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+          })
+          .catch(() => {
+            descriptionEl.textContent = "Failed to fetch weather.";
+          });
+      };
+
+      // Get location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => updateWeather(pos.coords.latitude, pos.coords.longitude),
+          () => { descriptionEl.textContent = "Location access denied."; }
+        );
+      } else {
+        descriptionEl.textContent = "Geolocation not supported.";
+      }
+
+      // Refresh on click
+      win.addEventListener('click', () => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            pos => updateWeather(pos.coords.latitude, pos.coords.longitude)
+          );
+        }
+      });
+    }
+  };
+
+  // Register app
+  if (typeof AppRegistry !== 'undefined') {
+    AppRegistry.registerApp({
+      id: 'weather',
+      name: 'Weather',
+      icon: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'><circle cx='24' cy='24' r='20' fill='%23f9d71c' stroke='%23e0b000' stroke-width='2'/></svg>",
+      handler: () => window.WeatherApp.open()
+    });
+  }
+})();
+
+/* ========== taskbar.js ========== */
+
+window.Taskbar = {
+    taskbarItems: new Map(),
+    clockInterval: null,
+    initialized: false,
     
+    // Initialize taskbar
+    init() {
+        if (this.initialized) return;
+               
+        this.setupTaskbar();
+        this.setupEventListeners();
+        this.startClock();
+        this.initialized = true;        
+        
+        // Emit ready event
+        if (window.EventBus) {
+            window.EventBus.emit('taskbar-ready');
+        }
+    },
+    
+    // Setup taskbar HTML structure or enhance existing
+    setupTaskbar() {
+        let taskbar = document.getElementById('taskbar');
+        
+        if (!taskbar) {
+            // Create taskbar if it doesn't exist
+            taskbar = document.createElement('div');
+            taskbar.id = 'taskbar';
+            taskbar.innerHTML = `
+                <button class="start-button" id="start-btn">
+                    <span>⊞</span> Start
+                </button>
+                <div class="taskbar-items" id="taskbar-items"></div>
+                <div class="clock" id="clock">--:--</div>
+            `;
+            document.body.appendChild(taskbar);
+        }
+        
+        // Setup click handlers for existing elements
+        const startBtn = document.getElementById('start-btn') || document.getElementById('start-button');
+        if (startBtn) {
+            startBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleStartMenu();
+            });
+        }
+        
+        // Add network icon if not present
+        if (!document.querySelector('.network-icon')) {
+            const networkIcon = document.createElement('button');
+            networkIcon.className = 'network-icon';
+            // Desktop computer emoji as requested
+            networkIcon.innerHTML = '<span style="font-size:14px;">🖥️</span>';
+            networkIcon.title = 'Network Status';
+            networkIcon.style.marginRight = '6px';
+            networkIcon.style.background = 'transparent';
+            networkIcon.style.border = 'none';
+            networkIcon.style.cursor = 'pointer';
+            networkIcon.addEventListener('click', () => {
+                            });
+            
+            // Insert before clock
+            const clock = document.getElementById('clock');
+            if (clock && clock.parentNode) {
+                clock.parentNode.insertBefore(networkIcon, clock);
+            }
+        }
+        
+        // Add show desktop functionality if not present
+        if (!document.querySelector('.show-desktop-button')) {
+            const showDesktopBtn = document.createElement('button');
+            showDesktopBtn.className = 'show-desktop-button';
+            // Your exact show desktop icon - taller to match PC emoji height
+            showDesktopBtn.innerHTML = `<img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22'><rect x='3' y='3' width='16' height='16' rx='2' ry='2' fill='%23ffffff'/><path d='M5 15h12v2H5z' fill='%23000000'/></svg>" alt="Show Desktop" style="width:18px;height:18px;">`;
+            showDesktopBtn.title = 'Show Desktop';
+            showDesktopBtn.style.marginRight = '6px';
+            showDesktopBtn.style.background = 'transparent';
+            showDesktopBtn.style.border = 'none';
+            showDesktopBtn.style.cursor = 'pointer';
+            showDesktopBtn.addEventListener('click', () => this.showDesktop());
+            
+            // Insert before network icon
+            const networkButton = document.querySelector('.network-icon');
+            if (networkButton && networkButton.parentNode) {
+                networkButton.parentNode.insertBefore(showDesktopBtn, networkButton);
+            } else {
+                // Fallback: insert before clock
+                const clock = document.getElementById('clock');
+                if (clock && clock.parentNode) {
+                    clock.parentNode.insertBefore(showDesktopBtn, clock);
+                }
+            }
+        }
+    },
+    
+    // Setup event listeners
+    setupEventListeners() {
+        if (!window.EventBus) return;
+        
+        // Window events
+        window.EventBus.on('window-minimized', (data) => {
+            this.addTaskbarItem(data.windowId, data.title);
+        });
+        
+        window.EventBus.on('window-restored', (data) => {
+            this.removeTaskbarItem(data.windowId);
+        });
+        
+        window.EventBus.on('window-closed', (data) => {
+            this.removeTaskbarItem(data.windowId);
+        });
+        
+        window.EventBus.on('window-created', (data) => {
+            // Remove from taskbar if it was there (window restored)
+            this.removeTaskbarItem(data.windowId);
+        });
+    },
+    
+    // Start the clock
+    startClock() {
+        this.updateClock();
+        if (this.clockInterval) {
+            clearInterval(this.clockInterval);
+        }
+        this.clockInterval = setInterval(() => {
+            this.updateClock();
+        }, 1000);
+    },
+    
+    // Update clock display
+    updateClock() {
+        const clock = document.getElementById('clock');
+        if (clock) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            clock.textContent = timeString;
+            clock.title = now.toLocaleDateString([], {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+    },
+    
+    // Add taskbar item for minimized window
+    addTaskbarItem(windowId, title) {
+        const taskbarItems = document.getElementById('taskbar-items');
+        if (!taskbarItems) return;
+        
+        // Remove existing item if present
+        this.removeTaskbarItem(windowId);
+        
+        const item = document.createElement('div');
+        item.className = 'taskbar-item';
+        item.id = `taskbar-${windowId}`;
+        item.title = title;
+        
+        // Truncate long titles
+        const displayTitle = title.length > 15 ? title.substring(0, 12) + '...' : title;
+        item.textContent = displayTitle;
+        
+        // Click handler to restore window
+        item.addEventListener('click', () => {
+            this.restoreWindow(windowId);
+        });
+        
+        taskbarItems.appendChild(item);
+        this.taskbarItems.set(windowId, item);
+        
+        // Scroll to show new item if needed
+        this.scrollTaskbarItems();
+    },
+    
+    // Remove taskbar item
+    removeTaskbarItem(windowId) {
+        const item = this.taskbarItems.get(windowId);
+        if (item && item.parentNode) {
+            item.remove();
+            this.taskbarItems.delete(windowId);
+        }
+    },
+    
+    // Restore window from taskbar
+    restoreWindow(windowId) {
+        if (window.WindowManager) {
+            window.WindowManager.restoreWindow(windowId);
+        }
+    },
+    
+    // Toggle start menu
+    toggleStartMenu() {
+        if (window.StartMenu) {
+            window.StartMenu.toggle();
+        } else {
+            // Fallback for basic start menu
+            const startMenu = document.getElementById('start-menu');
+            if (startMenu) {
+                startMenu.classList.toggle('open');
+            }
+        }
+    },
+    
+    // Show desktop functionality
+    showDesktop() {
+        if (window.DesktopManager) {
+            window.DesktopManager.showDesktop();
+        } else if (window.WindowManager) {
+            // Fallback: minimize all windows
+            const windows = window.WindowManager.getAllWindows();
+            windows.forEach(windowData => {
+                if (!windowData.isMinimized) {
+                    window.WindowManager.minimizeWindow(windowData.element.id);
+                }
+            });
+        }
+    },
+    
+    // Scroll taskbar items if overflow
+    scrollTaskbarItems() {
+        const taskbarItems = document.getElementById('taskbar-items');
+        if (taskbarItems && taskbarItems.scrollWidth > taskbarItems.clientWidth) {
+            taskbarItems.scrollLeft = taskbarItems.scrollWidth;
+        }
+    },
+    
+    // Get taskbar height
+    getHeight() {
+        return 40; // Standard taskbar height
+    },
+    
+    // Update taskbar for mobile/desktop
+    updateLayout(isMobile) {
+        const taskbar = document.getElementById('taskbar');
+        const startText = document.querySelector('.start-text') || taskbar?.querySelector('button span:last-child');
+        
+        if (taskbar) {
+            taskbar.classList.toggle('mobile-layout', isMobile);
+            taskbar.classList.toggle('desktop-layout', !isMobile);
+        }
+        
+        // Hide start text on mobile
+        if (startText && startText.textContent === 'Start') {
+            startText.style.display = isMobile ? 'none' : 'inline';
+        }
+    },
+    
+    // Cleanup
+    destroy() {
+        if (this.clockInterval) {
+            clearInterval(this.clockInterval);
+            this.clockInterval = null;
+        }
+        this.taskbarItems.clear();
+        this.initialized = false;
+    }
+};
+
+// Register documentation with Docs service - wait for it to be ready
+(function registerTaskbarDoc() {
+  const tryRegister = () => {
+    if (window.Docs && window.Docs.initialized && typeof window.Docs.register === 'function') {
+      window.Docs.register('taskbar', {
+        name: "Taskbar",
+        version: "1.0.0",
+        description: "System taskbar providing window management, system tray, clock, and quick access to system functions.",
+        type: "System Service",
+        features: [
+          "Minimized window tracking and restoration",
+          "Real-time clock display with date tooltip",
+          "Start menu integration",
+          "Show desktop functionality",
+          "Network status indicator",
+          "Dynamic window item management",
+          "Mobile/desktop responsive layout",
+          "Auto-scrolling for overflow items"
+        ],
+        methods: [
+          { name: "init()", description: "Initialize the taskbar system" },
+          { name: "addTaskbarItem(windowId, title)", description: "Add a minimized window to taskbar" },
+          { name: "removeTaskbarItem(windowId)", description: "Remove window from taskbar" },
+          { name: "restoreWindow(windowId)", description: "Restore a minimized window" },
+          { name: "showDesktop()", description: "Minimize all windows to show desktop" },
+          { name: "toggleStartMenu()", description: "Toggle start menu visibility" },
+          { name: "updateLayout(isMobile)", description: "Update layout for mobile/desktop" },
+          { name: "getHeight()", description: "Get taskbar height in pixels" }
+        ],
+        autoGenerated: false
+      });
+            return true;
+    }
+    return false;
+  };
+  
+})();
+
+/* ========== main.js ========== */
+
+window.WebDesktop = {
+    
+    initialized: false,
+    initializationPromise: null,
+    
+    // Initialize the core system only
+    init() {
+        if (this.initializationPromise) {
+            return this.initializationPromise;
+        }
+               
+        this.initializationPromise = this.bootstrap().catch(error => {
+                        this.showFallbackError(error);
+            throw error;
+        });
+        
+        return this.initializationPromise;
+    },
+    
+    // Main bootstrap sequence - core services only
+    async bootstrap() {
+               
+        await this.waitForDOM();
+        this.checkCoreServices();
+        await this.initializeCoreServices();
+        this.registerSystemApps();
+        this.finalizeSystem();
+                
+        this.initialized = true;
+        
+        if (window.EventBus) {
+            window.EventBus.emit('system-ready', { 
+                version: this.version,
+                timestamp: new Date()
+            });
+        }
+        
+        return true;
+    },
+    
+    waitForDOM() {
+        return new Promise(resolve => {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', resolve);
+            } else {
+                resolve();
+            }
+        });
+    },
+    
+    checkCoreServices() {
+        const requiredServices = ['EventBus', 'WindowManager', 'AppRegistry'];
+        const optionalServices = ['DesktopManager', 'Taskbar', 'StartMenu'];
+        
+        const missing = requiredServices.filter(service => !window[service]);
+        const optional = optionalServices.filter(service => !window[service]);
+        
+        if (missing.length > 0) {
+            throw new Error(`Missing required services: ${missing.join(', ')}`);
+        }
+        
+        if (optional.length > 0) {
+                    }
+        
+    },
+    async initializeCoreServices() {
+                
+        const services = ['DesktopManager', 'Taskbar', 'StartMenu'];
+        
+        for (const serviceName of services) {
+            if (window[serviceName] && typeof window[serviceName].init === 'function') {
+                try {
+                    window[serviceName].init();
+                                    } catch (error) {
+                                    }
+            }
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
+    
+    },
+    
+    // Register only essential system applications
+    registerSystemApps() {        
+        if (!window.AppRegistry) {
+                        return;
+        }
+        
+    },
+    
+    finalizeSystem() {
+        this.setupKeyboardShortcuts();
+        this.setupResponsiveHandling();
+        this.setupGlobalErrorHandling();
+        this.logSystemStatus();
+    },
+    
+    setupKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            // Alt + Space: Open start menu
+            if (e.altKey && e.code === 'Space') {
+                e.preventDefault();
+                if (window.StartMenu) {
+                    window.StartMenu.toggle();
+                }
+            }
+            
+            // Ctrl + Alt + D: Show desktop
+            if (e.ctrlKey && e.altKey && e.code === 'KeyD') {
+                e.preventDefault();
+                if (window.DesktopManager) {
+                    window.DesktopManager.showDesktop();
+                }
+            }
+            
+            // Escape: Close start menu
+            if (e.code === 'Escape') {
+                if (window.StartMenu && window.StartMenu.isOpen) {
+                    window.StartMenu.close();
+                }
+            }
+        });
+    },
+    
+    setupResponsiveHandling() {
+        const updateLayout = () => {
+            const isMobile = window.innerWidth < 768;
+            
+            if (window.Taskbar && typeof window.Taskbar.updateLayout === 'function') {
+                window.Taskbar.updateLayout(isMobile);
+            }
+            
+            if (window.DesktopManager && typeof window.DesktopManager.adjustLayout === 'function') {
+                window.DesktopManager.adjustLayout();
+            }
+        };
+        
+        updateLayout();
+        
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(updateLayout, 150);
+        });
+    },
+    
+    setupGlobalErrorHandling() {
+        window.addEventListener('error', (event) => {
+                        
+            if (window.EventBus) {
+                window.EventBus.emit('system-error', {
+                    error: event.error,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    timestamp: new Date()
+                });
+            }
+        });
+        
+        window.addEventListener('unhandledrejection', (event) => {
+                        
+            if (window.EventBus) {
+                window.EventBus.emit('system-error', {
+                    error: event.reason,
+                    type: 'unhandled-promise',
+                    timestamp: new Date()
+                });
+            }
+        });
+    },
+    
+    logSystemStatus() {
+        const status = {
+            version: this.version,
+            initialized: this.initialized,
+            viewport: `${window.innerWidth}x${window.innerHeight}`,
+            services: {
+                eventBus: !!window.EventBus,
+                windowManager: !!window.WindowManager,
+                appRegistry: !!window.AppRegistry,
+                desktopManager: !!window.DesktopManager,
+                taskbar: !!window.Taskbar,
+                startMenu: !!window.StartMenu
+            }
+        };
+        
+            },
+    
+    showFallbackError(error) {
+        document.body.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #667eea, #764ba2); color: white; font-family: 'Segoe UI', sans-serif;">
+                <div style="text-align: center; max-width: 500px; padding: 40px;">
+                    <h1 style="margin-bottom: 20px; font-size: 24px;">WebDesktop Failed to Load</h1>
+                    <p style="margin-bottom: 20px; opacity: 0.9;">There was an error initializing the desktop environment.</p>
+                    <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; font-family: monospace; font-size: 12px;">
+                        ${error.message}
+                    </div>
+                    <button onclick="location.reload()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                        Reload Page
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+};
+
+// Auto-initialize when script loads
+if (typeof window !== 'undefined') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.WebDesktop.init();
+        });
+    } else {
+        setTimeout(() => {
+            window.WebDesktop.init();
+        }, 10);
+    }
+}
+
+/* ========== display.js ========== */
+
+window.DisplayManager = {
+    currentOrientation: null,
+    resizeTimeout: null,
+    initialized: false,
+    
+    // Display settings (default values, overwritten by loadSettings in init)
+    settings: {
+        iconSize: 'medium',
+        iconSpacing: 'normal',
+        layoutMode: 'auto', 
+        columnsPerRow: 4 
+    },
+
+    // Initialize display management
+    init() {
+        if (this.initialized) return;
+                
+        // 1. Load initial settings
+        if (window.DesktopSettingsApp) {
+            const initialSettings = window.DesktopSettingsApp.loadSettings();
+            
+            // Only update settings that DisplayManager manages
+            const displaySettings = {};
+            ['iconSize', 'iconSpacing', 'layoutMode', 'columnsPerRow'].forEach(key => {
+                displaySettings[key] = initialSettings[key];
+            });
+            this.updateSettings(displaySettings, { isInitialLoad: true });
+                    }
+
+        // 2. Setup environment state
+        this.currentOrientation = this.detectOrientation();
+        this.setupEventListeners();
+        this.initialized = true;
+        
+                if (window.EventBus) {
+            window.EventBus.emit('display-ready');
+        }
+    },
+
+    // Detect current device orientation
+    detectOrientation() {
+        if (window.screen && window.screen.orientation) {
+            const angle = window.screen.orientation.angle;
+            return (angle === 0 || angle === 180) ? 'portrait' : 'landscape';
+        }
+        // Fallback to window dimensions
+        return window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+    },
+
+    // Check if device is mobile/tablet
+    isMobileDevice() {
+        return window.innerWidth < 768;
+    },
+
+    // Setup event listeners for display changes
+    setupEventListeners() {
+        // Handle window resize and orientation changes with debouncing
+        const handleResize = () => {
+            clearTimeout(this.resizeTimeout);
+            this.resizeTimeout = setTimeout(() => {
+                const newOrientation = this.detectOrientation();
+                
+                // Only emit orientation change if it actually changed
+                if (newOrientation !== this.currentOrientation) {
+                                        this.currentOrientation = newOrientation;
+                    
+                    if (window.EventBus) {
+                        window.EventBus.emit('orientation-changed', {
+                            orientation: newOrientation,
+                            isMobile: this.isMobileDevice()
+                        });
+                    }
+                }
+                
+                // Always emit display resized for layout adjustments
+                if (window.EventBus) {
+                    window.EventBus.emit('display-resized', {
+                        width: window.innerWidth,
+                        height: window.innerHeight,
+                        orientation: newOrientation,
+                        isMobile: this.isMobileDevice()
+                    });
+                }
+            }, 150);
+        };
+
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', () => {
+            // Orientation change needs extra delay to get accurate dimensions
+            setTimeout(handleResize, 300);
+        });
+
+        // FIX: Listen for the central settings update event
+        if (window.EventBus) {
+            window.EventBus.on('desktop-settings-updated', (fullSettings) => {
+                                // Filter the full settings payload for only display-relevant properties
+                const displaySettings = {};
+                ['iconSize', 'iconSpacing', 'layoutMode', 'columnsPerRow'].forEach(key => {
+                    if (fullSettings[key] !== undefined) {
+                        displaySettings[key] = fullSettings[key];
+                    }
+                });
+                
+                this.updateSettings(displaySettings);
+            });
+        }
+    },
+
+    // Generate container styles for mobile layout
+    getMobileLayoutStyles(spacing, iconSize, orientation) {
+        let gridColumns;
+        
+        // Ensure columnsPerRow is a valid number for 'manual' mode
+        const columns = parseInt(this.settings.columnsPerRow) || 4;
+
+        if (this.settings.layoutMode === 'grid') {
+            gridColumns = `repeat(${columns}, 1fr)`;
+        } else {
+            // Auto and Adaptive modes use auto-fit/minmax
+            const minIconSize = iconSize + 20; // Icon size + margin/padding
+            gridColumns = `repeat(auto-fit, minmax(${minIconSize}px, 1fr))`;
+        }
+        
+        return {
+            position: 'absolute',
+            top: '20px',
+            left: '20px',
+            right: '20px',
+            display: 'grid',
+            gridTemplateColumns: gridColumns,
+            gap: `${spacing}px`,
+            zIndex: '100',
+            maxHeight: 'calc(100vh - 100px)',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            alignItems: 'start',
+            justifyItems: 'center',
+            paddingBottom: '20px',
+            transition: 'grid-template-columns 0.3s ease, gap 0.3s ease'
+        };
+    },
+
+    // Generate container styles for desktop layout
+    getDesktopLayoutStyles(spacing, iconSize, orientation) {
+        const columns = parseInt(this.settings.columnsPerRow) || 4;
+        
+        // Always use grid layout for desktop for modern responsiveness
+        let gridColumns;
+        
+        if (this.settings.layoutMode === 'grid') {
+            // Manual mode: fixed columns
+            gridColumns = `repeat(${columns}, 1fr)`;
+        } else {
+            // Auto/Adaptive mode: responsive grid based on screen width
+            const minIconWidth = iconSize + 30; // Icon + spacing/padding
+            gridColumns = `repeat(auto-fit, minmax(${minIconWidth}px, 1fr))`;
+        }
+            
+        return {
+            position: 'absolute',
+            top: '20px',
+            left: '40px',
+            right: '40px',
+            display: 'grid',
+            gridTemplateColumns: gridColumns,
+            gap: `${spacing + 5}px`,
+            zIndex: '100',
+            maxHeight: 'calc(100vh - 100px)',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            alignItems: 'start',
+            justifyItems: 'center',
+            paddingBottom: '20px',
+            transition: 'grid-template-columns 0.3s ease, gap 0.3s ease'
+        };
+    },
+
+    // Get layout styles based on current display state
+    getLayoutStyles() {
+        const spacing = this.getSpacingValue();
+        const iconSize = this.getIconSize();
+        const isMobile = this.isMobileDevice();
+        const orientation = this.detectOrientation();
+        
+        // Update current orientation if changed
+        if (orientation !== this.currentOrientation) {
+            this.currentOrientation = orientation;
+        }
+
+        if (isMobile) {
+            return this.getMobileLayoutStyles(spacing, iconSize, orientation);
+        } else {
+            return this.getDesktopLayoutStyles(spacing, iconSize, orientation);
+        }
+    },
+
+    // Apply styles to a container element
+    applyStylesToContainer(container) {
+        if (!container) return;
+        
+        const styles = this.getLayoutStyles();
+        
+        // Apply all styles to the container
+        Object.keys(styles).forEach(property => {
+            // Helper to convert camelCase to kebab-case
+            const cssProp = property.replace(/([A-Z])/g, '-$1').toLowerCase();
+            container.style.setProperty(cssProp, styles[property]);
+        });
+    },
+
+    // Get icon size in pixels
+    getIconSize() {
+        const sizes = {
+            small: 32,
+            medium: 48,
+            large: 64
+        };
+        return sizes[this.settings.iconSize] || 48;
+    },
+    
+    // Get spacing value in pixels
+    getSpacingValue() {
+        const spacings = {
+            tight: 8,
+            normal: 15,
+            loose: 25
+        };
+        return spacings[this.settings.iconSpacing] || 15;
+    },
+
+    // Get container width for icons based on orientation and device
+    getIconContainerWidth() {
+        const iconSize = this.getIconSize();
+        const spacing = this.getSpacingValue();
+        // Width should accommodate the icon and some buffer/padding
+        return iconSize + spacing + 10; 
+    },
+
+    // Update settings
+    updateSettings(newSettings, options = {}) {
+        const oldSettings = { ...this.settings };
+        this.settings = { ...this.settings, ...newSettings };
+        
+        // Check if layout-affecting settings changed
+        const layoutChanged = (
+            oldSettings.iconSize !== this.settings.iconSize ||
+            oldSettings.iconSpacing !== this.settings.iconSpacing ||
+            oldSettings.layoutMode !== this.settings.layoutMode ||
+            oldSettings.columnsPerRow !== this.settings.columnsPerRow
+        );
+        
+        if (layoutChanged && window.EventBus && !options.isInitialLoad) {
+            // Only emit layout change if settings changed AND it's not the initial load
+            window.EventBus.emit('layout-changed', {
+                settings: this.settings,
+                orientation: this.currentOrientation,
+                isMobile: this.isMobileDevice()
+            });
+                    }
+    },
+    
+    // Get current settings
+    getSettings() {
+        return { ...this.settings };
+    },
+
+    // Get current display status
+    getStatus() {
+        return {
+            initialized: this.initialized,
+            orientation: this.currentOrientation,
+            isMobile: this.isMobileDevice(),
+            width: window.innerWidth,
+            height: window.innerHeight,
+            settings: this.settings
+        };
+    },
+
+    // Force refresh display state
+    forceRefresh() {
+                this.currentOrientation = this.detectOrientation();
+        
+        if (window.EventBus) {
+            window.EventBus.emit('display-force-refresh', {
+                orientation: this.currentOrientation,
+                isMobile: this.isMobileDevice(),
+                settings: this.settings
+            });
+        }
+    }
+};
+
+// Auto-initialize when system is ready
+if (typeof window !== 'undefined') {
+    const initManager = () => {
+        if (window.DesktopSettingsApp) {
+            window.DisplayManager.init();
+        } else {
+                         // Simple poll to wait for the settings app to load its window object
+            const waitForSettings = setInterval(() => {
+                if (window.DesktopSettingsApp) {
+                    clearInterval(waitForSettings);
+                    window.DisplayManager.init();
+                }
+            }, 100);
+        }
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initManager, 100);
+        });
+    } else {
+        setTimeout(initManager, 100);
+    }
+}
+
+/* ========== window-manager.js ========== */
+
+window.WindowManager = {
+    activeWindows: new Map(),
+    nextWindowId: 0,
+    highestZIndex: 1000,
+    
+    // Create new window - now with fullscreen button
+    createWindow(title, content, width = 400, height = 300) {
+        const windowId = `win-${++this.nextWindowId}`;
+        
+        if (!title || !content) {
+                        return null;
+        }
+        
+        const win = document.createElement('div');
+        win.className = 'window';
+        win.id = windowId;
+        
+        // Build window HTML with fullscreen button added
+        win.innerHTML = `
+            <div class="window-title-bar">
+                <span class="window-title">${this.escapeHtml(title)}</span>
+                <div class="window-controls">
+                    <button class="minimize-btn" title="Minimize">_</button>
+                    <button class="maximize-btn" title="Maximize">□</button>
+                    <button class="fullscreen-btn" title="Fullscreen">⛶</button>
+                    <button class="close-btn" title="Close">×</button>
+                </div>
+            </div>
+            <div class="window-content">${content}</div>
+        `;
+        
+        const viewport = this.getViewportConstraints();
+        const safeWidth = Math.min(width, viewport.maxWidth);
+        const safeHeight = Math.min(height, viewport.maxHeight);
+        
+        const position = this.calculatePosition(safeWidth, safeHeight);
+        
+        win.style.cssText = `
+            position: absolute;
+            width: ${safeWidth}px;
+            height: ${safeHeight}px;
+            left: ${position.x}px;
+            top: ${position.y}px;
+            z-index: ${++this.highestZIndex};
+            pointer-events: auto;
+        `;
+        
+        this.activeWindows.set(windowId, {
+            element: win,
+            title: title,
+            isMinimized: false,
+            isMaximized: false,
+            isFullscreen: false,
+            originalWidth: safeWidth,
+            originalHeight: safeHeight,
+            originalX: position.x,
+            originalY: position.y
+        });
+        
+        this.appendToContainer(win);
+        
+        this.setupWindowControls(win, windowId);
+        this.makeWindowDraggable(win);
+        
+        if (window.EventBus) {
+            window.EventBus.emit('window-created', { windowId, title });
+        }
+        
+        return win;
+    },
+    
+    // Window control handlers - now includes fullscreen
+    setupWindowControls(win, windowId) {
+        const minimizeBtn = win.querySelector('.minimize-btn');
+        const maximizeBtn = win.querySelector('.maximize-btn');
+        const fullscreenBtn = win.querySelector('.fullscreen-btn');
+        const closeBtn = win.querySelector('.close-btn');
+        
+        minimizeBtn.onclick = (e) => {
+            e.stopPropagation();
+            this.minimizeWindow(windowId);
+        };
+        
+        maximizeBtn.onclick = (e) => {
+            e.stopPropagation();
+            this.toggleMaximize(windowId);
+        };
+        
+        // NEW: Fullscreen button handler
+        fullscreenBtn.onclick = (e) => {
+            e.stopPropagation();
+            this.toggleFullscreen(windowId);
+        };
+        
+        closeBtn.onclick = (e) => {
+            e.stopPropagation();
+            this.closeWindow(windowId);
+        };
+        
+        win.addEventListener('mousedown', () => this.bringToFront(win));
+        win.addEventListener('touchstart', () => this.bringToFront(win));
+        
+        // Listen for fullscreen changes
+        this.setupFullscreenListeners(win, windowId);
+    },
+    
+    // NEW: Toggle fullscreen using browser Fullscreen API
+    toggleFullscreen(windowId) {
+        const windowData = this.activeWindows.get(windowId);
+        if (!windowData) return;
+        
+        const win = windowData.element;
+        
+        if (!windowData.isFullscreen) {
+            // Enter fullscreen
+            if (win.requestFullscreen) {
+                win.requestFullscreen().catch(err => {
+                                    });
+            } else if (win.webkitRequestFullscreen) {
+                win.webkitRequestFullscreen();
+            } else if (win.mozRequestFullScreen) {
+                win.mozRequestFullScreen();
+            } else if (win.msRequestFullscreen) {
+                win.msRequestFullscreen();
+            }
+        } else {
+            // Exit fullscreen
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+    },
+    
+    // NEW: Setup fullscreen event listeners
+    setupFullscreenListeners(win, windowId) {
+        const handleFullscreenChange = () => {
+            const windowData = this.activeWindows.get(windowId);
+            if (!windowData) return;
+            
+            const isFullscreen = document.fullscreenElement === win ||
+                                document.webkitFullscreenElement === win ||
+                                document.mozFullScreenElement === win ||
+                                document.msFullscreenElement === win;
+            
+            windowData.isFullscreen = isFullscreen;
+            
+            const fullscreenBtn = win.querySelector('.fullscreen-btn');
+            if (fullscreenBtn) {
+                fullscreenBtn.textContent = isFullscreen ? '⛶' : '⛶';
+                fullscreenBtn.title = isFullscreen ? 'Exit Fullscreen' : 'Fullscreen';
+            }
+            
+            // Update window styling
+            if (isFullscreen) {
+                win.classList.add('fullscreen');
+            } else {
+                win.classList.remove('fullscreen');
+            }
+            
+            if (window.EventBus) {
+                window.EventBus.emit(isFullscreen ? 'window-fullscreen-enter' : 'window-fullscreen-exit', { windowId });
+            }
+        };
+        
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+        document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+    },
+    
+    minimizeWindow(windowId) {
+        const windowData = this.activeWindows.get(windowId);
+        if (!windowData || windowData.isMinimized) return;
+        
+        const win = windowData.element;
+        win.style.display = 'none';
+        windowData.isMinimized = true;
+        
+        if (window.EventBus) {
+            window.EventBus.emit('window-minimized', { windowId, title: windowData.title });
+        }
+    },
+    
+    restoreWindow(windowId) {
+        const windowData = this.activeWindows.get(windowId);
+        if (!windowData || !windowData.isMinimized) return;
+        
+        const win = windowData.element;
+        win.style.display = 'block';
+        windowData.isMinimized = false;
+        this.bringToFront(win);
+        
+        if (window.EventBus) {
+            window.EventBus.emit('window-restored', { windowId });
+        }
+    },
+    
+    toggleMaximize(windowId) {
+        const windowData = this.activeWindows.get(windowId);
+        if (!windowData) return;
+        
+        const win = windowData.element;
+        const viewport = this.getViewportConstraints();
+        
+        if (!windowData.isMaximized) {
+            const rect = win.getBoundingClientRect();
+            windowData.restoreX = rect.left;
+            windowData.restoreY = rect.top;
+            windowData.restoreWidth = rect.width;
+            windowData.restoreHeight = rect.height;
+            
+            win.style.left = '0px';
+            win.style.top = '0px';
+            win.style.width = viewport.width + 'px';
+            win.style.height = viewport.availableHeight + 'px';
+            win.classList.add('maximized');
+            
+            windowData.isMaximized = true;
+        } else {
+            win.style.left = windowData.restoreX + 'px';
+            win.style.top = windowData.restoreY + 'px';
+            win.style.width = windowData.restoreWidth + 'px';
+            win.style.height = windowData.restoreHeight + 'px';
+            win.classList.remove('maximized');
+            
+            windowData.isMaximized = false;
+        }
+        
+        this.bringToFront(win);
+    },
+    
+    closeWindow(windowId) {
+        const windowData = this.activeWindows.get(windowId);
+        if (!windowData) return;
+        
+        const win = windowData.element;
+        
+        if (window.EventBus) {
+            window.EventBus.emit('window-closing', { windowId });
+        }
+        
+        win.remove();
+        this.activeWindows.delete(windowId);
+        
+        if (window.EventBus) {
+            window.EventBus.emit('window-closed', { windowId });
+        }
+    },
+    
+    makeWindowDraggable(win) {
+        const titleBar = win.querySelector('.window-title-bar');
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+        
+        const startDrag = (clientX, clientY, e) => {
+            if (e.target.closest('.window-controls')) return;
+            
+            const windowData = this.activeWindows.get(win.id);
+            if (windowData && windowData.isMaximized) return;
+            
+            isDragging = true;
+            const rect = win.getBoundingClientRect();
+            dragOffset.x = clientX - rect.left;
+            dragOffset.y = clientY - rect.top;
+            
+            titleBar.style.cursor = 'grabbing';
+            this.bringToFront(win);
+            e.preventDefault();
+        };
+        
+        const performDrag = (clientX, clientY) => {
+            if (!isDragging) return;
+            
+            const viewport = this.getViewportConstraints();
+            let newX = clientX - dragOffset.x;
+            let newY = clientY - dragOffset.y;
+            
+            const minVisible = 50;
+            newX = Math.max(-win.offsetWidth + minVisible, Math.min(newX, viewport.width - minVisible));
+            newY = Math.max(0, Math.min(newY, viewport.availableHeight - 30));
+            
+            win.style.left = newX + 'px';
+            win.style.top = newY + 'px';
+        };
+        
+        const endDrag = () => {
+            if (isDragging) {
+                isDragging = false;
+                titleBar.style.cursor = 'grab';
+            }
+        };
+        
+        titleBar.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY, e));
+        document.addEventListener('mousemove', (e) => performDrag(e.clientX, e.clientY));
+        document.addEventListener('mouseup', endDrag);
+        
+        titleBar.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            startDrag(touch.clientX, touch.clientY, e);
+        });
+        document.addEventListener('touchmove', (e) => {
+            if (e.touches[0]) performDrag(e.touches[0].clientX, e.touches[0].clientY);
+        });
+        document.addEventListener('touchend', endDrag);
+        
+        titleBar.style.cursor = 'grab';
+    },
+    
+    bringToFront(win) {
+        win.style.zIndex = ++this.highestZIndex;
+    },
+    
+    getViewportConstraints() {
+        return {
+            width: window.innerWidth,
+            height: window.innerHeight,
+            availableHeight: window.innerHeight - 40,
+            maxWidth: Math.max(300, window.innerWidth - 40),
+            maxHeight: Math.max(200, window.innerHeight - 80)
+        };
+    },
+    
+    calculatePosition(width, height) {
+        const viewport = this.getViewportConstraints();
+        const cascade = (this.nextWindowId - 1) * 25;
+        const baseX = 50 + cascade;
+        const baseY = 50 + cascade;
+        
+        return {
+            x: Math.min(baseX, viewport.width - width - 20),
+            y: Math.min(baseY, viewport.availableHeight - height - 20)
+        };
+    },
+    
+    appendToContainer(win) {
+        const container = document.getElementById('windows-container');
+        if (container) {
+            container.appendChild(win);
+        } else {
+            const desktop = document.getElementById('desktop');
+            if (desktop) {
+                desktop.appendChild(win);
+            } else {
+                document.body.appendChild(win);
+            }
+        }
+    },
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    },
+    
+    getAllWindows() {
+        return Array.from(this.activeWindows.values());
+    },
+    
+    getWindow(windowId) {
+        return this.activeWindows.get(windowId);
+    }
+};
+
+</script></body></html>
