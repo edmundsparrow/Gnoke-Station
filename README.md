@@ -1,6 +1,6 @@
 # 💻 Gnokestation - The Modular WebDesktop
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/e8d4c7d0-c3d5-49e0-84a1-8d2629b3a985/deploy-status)](https://gnoke-web.netlify.app)
+[!(https://gnoke-web.netlify.app)
 [![Architecture-SPA](https://img.shields.io/badge/Architecture-Single--Page%20App-2980b9?style=flat-square)](https://gnoke-web.netlify.app)
 [![Size-700KB](https://img.shields.io/badge/Footprint-~700KB-009688?style=flat-square)]()
 [![License-GPL3](https://img.shields.io/badge/License-GPL--3.0-blue?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
